@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CarePulse Clinic - Appointments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="md:flex md:items-center md:justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Appointments Management</h1>
+                <p class="mt-1 text-sm text-slate-500">Track appointment lifecycles, state transitions, and cancellation fees.</p>
+            </div>
+        </div>
+
+        <!-- Alert Notifications -->
+        <div th:if="${errorMessage}" id="error-alert" class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm">
+            <div class="flex items-center">
+                <div class="ml-3">
+                    <p id="error-message-text" class="text-sm font-semibold text-red-800" th:text="${errorMessage}"></p>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${successMessage}" id="success-alert" class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 p-4 rounded-xl shadow-sm">
+            <div class="flex items-center">
+                <div class="ml-3">
+                    <p id="success-message-text" class="text-sm font-semibold text-emerald-800" th:text="${successMessage}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interactive Cancellation Fee Calculator Card (BVA Preview) -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 mb-8 shadow-sm">
+            <h3 class="text-base font-bold text-slate-900 mb-2">⚡ Cancellation Fee BVA Estimator</h3>
+            <p class="text-xs text-slate-500 mb-4">Test equivalence partitions and boundary values: ≥48h ($0), 24–47h ($50), 0–23h ($100).</p>
+            <div class="flex items-center space-x-4">
+                <div class="w-48">
+                    <input type="number" id="preview-hours-input" placeholder="Hours (e.g. 48)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-800"/>
+                </div>
+                <button type="button" id="preview-fee-btn" onclick="calculateFeePreview()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2.5 px-4 rounded-lg transition">
+                    Calculate Fee
+                </button>
+                <div id="fee-result" class="text-sm font-bold text-slate-700"></div>
+            </div>
+        </div>
+
+        <!-- Appointments Table -->
+        <div class="bg-white shadow-sm rounded-2xl border border-slate-200/80 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <h2 class="text-base font-bold text-slate-900">Clinic Appointments Lifecycle</h2>
+                <span class="text-xs font-semibold text-slate-500" th:text="${#lists.size(appointments) + ' Record(s)'}">0 Records</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-200" id="appointments-table">
+                    <thead class="bg-slate-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Appt ID</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Patient</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Doctor</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Notice</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Fee</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-slate-500 uppercase tracking-wider">Lifecycle Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-slate-100">
+                        <tr th:if="${#lists.isEmpty(appointments)}">
+                            <td colspan="7" class="px-6 py-8 text-center text-sm text-slate-400">
+                                No appointments registered yet.
+                            </td>
+                        </tr>
+                        <tr th:each="appt : ${appointments}" th:id="'appointment-row-' + ${appt.id}" class="hover:bg-slate-50/80 transition">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900" th:text="'#' + ${appt.id}">#1</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-800" th:text="${patientNames[appt.patientId]}">Patient Name</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600" th:text="${doctorNames[appt.doctorId]}">Doctor Name</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600 font-semibold" th:text="${appt.hoursUntilAppointment + ' hrs'}">48 hrs</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span th:if="${appt.state.name() == 'REQUESTED'}" th:id="'state-badge-' + ${appt.id}" class="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                                    REQUESTED
+                                </span>
+                                <span th:if="${appt.state.name() == 'CONFIRMED'}" th:id="'state-badge-' + ${appt.id}" class="px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                    CONFIRMED
+                                </span>
+                                <span th:if="${appt.state.name() == 'ATTENDED'}" th:id="'state-badge-' + ${appt.id}" class="px-3 py-1 text-xs font-bold rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+                                    ATTENDED
+                                </span>
+                                <span th:if="${appt.state.name() == 'CANCELLED'}" th:id="'state-badge-' + ${appt.id}" class="px-3 py-1 text-xs font-bold rounded-full bg-rose-100 text-rose-800 border border-rose-200">
+                                    CANCELLED
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-700" th:id="'fee-cell-' + ${appt.id}" th:text="${'$' + #numbers.formatDecimal(appt.cancellationFee, 1, 2)}">
+                                $0.00
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                <form th:if="${appt.state.name() == 'REQUESTED'}" action="#" th:action="@{/appointments/{id}/confirm(id=${appt.id})}" method="post" class="inline">
+                                    <button type="submit" th:id="'confirm-btn-' + ${appt.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
+                                        Confirm
+                                    </button>
+                                </form>
+                                <form th:if="${appt.state.name() == 'CONFIRMED'}" action="#" th:action="@{/appointments/{id}/attend(id=${appt.id})}" method="post" class="inline">
+                                    <button type="submit" th:id="'attend-btn-' + ${appt.id}" class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
+                                        Mark Attended
+                                    </button>
+                                </form>
+                                <form th:if="${appt.state.name() == 'REQUESTED' or appt.state.name() == 'CONFIRMED'}" action="#" th:action="@{/appointments/{id}/cancel(id=${appt.id})}" method="post" class="inline">
+                                    <button type="submit" th:id="'cancel-btn-' + ${appt.id}" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-sm transition">
+                                        Cancel Appt
+                                    </button>
+                                </form>
+                                <span th:if="${appt.state.name() == 'ATTENDED' or appt.state.name() == 'CANCELLED'}" class="text-xs text-slate-400 font-semibold italic">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function calculateFeePreview() {
+            const input = document.getElementById('preview-hours-input');
+            const resultDiv = document.getElementById('fee-result');
+            const hours = input.value;
+            if (hours === "") {
+                resultDiv.innerText = "Please enter hours.";
+                return;
+            }
+            fetch('/appointments/preview-fee?hours=' + hours)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        resultDiv.innerText = 'Calculated Fee: $' + data.fee.toFixed(2);
+                        resultDiv.className = 'text-sm font-bold text-emerald-600';
+                    } else {
+                        resultDiv.innerText = 'Error: ' + data.error;
+                        resultDiv.className = 'text-sm font-bold text-rose-600';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>
