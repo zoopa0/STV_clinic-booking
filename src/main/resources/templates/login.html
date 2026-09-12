@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>CarePulse Clinic - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+        <div class="flex justify-center">
+            <div class="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+            </div>
+        </div>
+        <h2 class="mt-4 text-center text-3xl font-extrabold text-slate-900">CarePulse Clinic</h2>
+        <p class="mt-2 text-center text-sm text-slate-600">Select a patient profile to simulate clinic authentication</p>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
+        <div class="bg-white py-8 px-6 shadow-xl rounded-2xl border border-slate-100">
+            <div th:if="${error}" id="login-error-alert" class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
+                <p class="text-sm text-red-700 font-medium" th:text="${error}"></p>
+            </div>
+
+            <form action="/login" method="post" class="space-y-6">
+                <div>
+                    <label for="patientSelect" class="block text-sm font-medium text-slate-700 mb-2">Select Patient Profile</label>
+                    <select id="patientSelect" name="patientId" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 font-medium">
+                        <option th:each="patient : ${patients}" 
+                                th:value="${patient.id}" 
+                                th:text="${patient.name + (patient.hasUnpaidBills ? ' (⚠️ Unpaid Bills)' : ' (✓ Clear)')}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/60 text-xs text-slate-600 space-y-2">
+                    <div class="font-semibold text-slate-700 mb-1">Decision Table Test Scenarios:</div>
+                    <div class="flex items-center justify-between">
+                        <span>John Doe:</span>
+                        <span class="font-medium text-emerald-600">Clean Billing (Can Book)</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Alice Smith:</span>
+                        <span class="font-medium text-rose-600">Has Unpaid Bills (Booking Rejection)</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="login-submit-btn" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                    Sign In to Portal
+                </button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

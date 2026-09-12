@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="bg-slate-900 text-white shadow-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 p-2 rounded-lg text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.12a2 2 0 00-1.022.547l-1.002 1.002a2 2 0 000 2.828l1.002 1.002a2 2 0 002.828 0l1.002-1.002a2 2 0 00.547-1.022l.477-2.387a6 6 0 01.517-3.86l.158-.318a6 6 0 00.517-3.86L8.88 5.6a2 2 0 00-.547-1.022L7.33 3.576a2 2 0 00-2.828 0L3.5 4.578a2 2 0 000 2.828l1.002 1.002"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                </div>
+                <a href="/doctors" class="font-bold text-xl tracking-tight text-white hover:text-blue-400 transition">CarePulse Clinic</a>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <a href="/doctors" id="nav-doctors-link" class="text-slate-300 hover:text-white font-medium transition flex items-center space-x-1">
+                    <span>Doctors Directory</span>
+                </a>
+                <a href="/appointments" id="nav-appointments-link" class="text-slate-300 hover:text-white font-medium transition flex items-center space-x-1">
+                    <span>Appointments</span>
+                </a>
+
+                <div th:if="${session.currentPatient != null}" class="flex items-center space-x-4 pl-4 border-l border-slate-700">
+                    <div class="text-right">
+                        <div id="user-display-name" class="text-sm font-semibold text-slate-100" th:text="${session.currentPatient.name}">Patient Name</div>
+                        <div id="user-bills-badge" class="text-xs flex items-center justify-end space-x-1">
+                            <span th:if="${session.currentPatient.hasUnpaidBills}" class="text-red-400 font-medium">⚠️ Unpaid Bills</span>
+                            <span th:unless="${session.currentPatient.hasUnpaidBills}" class="text-emerald-400 font-medium">✓ Clean Billing</span>
+                        </div>
+                    </div>
+                    <a href="/logout" id="logout-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-md text-xs font-semibold transition border border-slate-700">
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
