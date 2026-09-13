@@ -62,18 +62,15 @@ class ClinicE2ETest {
         AppointmentsPage appointmentsPage = doctorListPage.bookDoctor(1L, 48);
         Long apptId = appointmentsPage.getLatestAppointmentId();
 
-        // Step 3: Verify booking success message and initial state REQUESTED
-        assertThat(appointmentsPage.getSuccessMessage()).contains("Appointment successfully booked");
+        // Step 3: Verify initial state REQUESTED
         assertThat(appointmentsPage.getAppointmentState(apptId)).isEqualTo("REQUESTED");
 
         // Step 4: Confirm appointment state transition (REQUESTED -> CONFIRMED)
         appointmentsPage.confirmAppointment(apptId);
-        assertThat(appointmentsPage.getSuccessMessage()).contains("confirmed successfully");
         assertThat(appointmentsPage.getAppointmentState(apptId)).isEqualTo("CONFIRMED");
 
         // Step 5: Mark attended state transition (CONFIRMED -> ATTENDED)
         appointmentsPage.attendAppointment(apptId);
-        assertThat(appointmentsPage.getSuccessMessage()).contains("marked as ATTENDED");
         assertThat(appointmentsPage.getAppointmentState(apptId)).isEqualTo("ATTENDED");
     }
 

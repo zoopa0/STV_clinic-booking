@@ -3,6 +3,7 @@ package com.clinic.booking.e2e.pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 
 import java.util.List;
 
@@ -41,16 +42,19 @@ public class AppointmentsPage extends BasePage {
     public void confirmAppointment(Long appointmentId) {
         By confirmBtn = By.id("confirm-btn-" + appointmentId);
         click(confirmBtn);
+        wait.until(ExpectedConditions.refreshed(ExpectedConditions.textToBePresentInElementLocated(successMessageText, "confirmed successfully")));
     }
 
     public void attendAppointment(Long appointmentId) {
         By attendBtn = By.id("attend-btn-" + appointmentId);
         click(attendBtn);
+        wait.until(ExpectedConditions.refreshed(ExpectedConditions.textToBePresentInElementLocated(successMessageText, "marked as ATTENDED")));
     }
 
     public void cancelAppointment(Long appointmentId) {
         By cancelBtn = By.id("cancel-btn-" + appointmentId);
         click(cancelBtn);
+        wait.until(ExpectedConditions.refreshed(ExpectedConditions.textToBePresentInElementLocated(successMessageText, "cancelled")));
     }
 
     public String getSuccessMessage() {

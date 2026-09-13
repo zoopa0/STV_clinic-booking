@@ -1,7 +1,6 @@
 package com.clinic.booking.e2e.pages;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -21,36 +20,44 @@ public abstract class BasePage {
     }
 
     protected WebElement waitForElementVisible(By locator) {
-        return wait.until(ExpectedConditions.refreshed(ExpectedConditions.visibilityOfElementLocated(locator)));
+        return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
     protected WebElement waitForElementClickable(By locator) {
-        return wait.until(ExpectedConditions.refreshed(ExpectedConditions.elementToBeClickable(locator)));
+        return wait.until(ExpectedConditions.elementToBeClickable(locator));
     }
 
     protected void click(By locator) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
-                waitForElementClickable(locator).click();
-                return;
-            } catch (StaleElementReferenceException e) {
+                WebElement elem = driver.findElement(locator);
+                if (elem.isDisplayed() && elem.isEnabled()) {
+                    elem.click();
+                    return;
+                }
+            } catch (Exception e) {
                 try { Thread.sleep(250); } catch (InterruptedException ignored) {}
             }
         }
-        waitForElementClickable(locator).click();
+        driver.findElement(locator).click();
     }
 
     protected void type(By locator, String text) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
-                WebElement elem = waitForElementVisible(locator);
-                elem.clear();
-                elem.sendKeys(text);
-                return;
-            } catch (StaleElementReferenceException e) {
+                WebElement elem = driver.findElement(locator);
+                if (elem.isDisplayed()) {
+                    elem.clear();
+                    elem.sendKeys(text);
+                    return;
+                }
+            } catch (Exception e) {
                 try { Thread.sleep(250); } catch (InterruptedException ignored) {}
             }
         }
+        WebElement elem = driver.findElement(locator);
+        elem.clear();
+        elem.sendKeys(text);
     }
 
     protected void selectByValue(By locator, String value) {
@@ -60,20 +67,23 @@ public abstract class BasePage {
     }
 
     protected String getText(By locator) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 5; i++) {
             try {
-                return waitForElementVisible(locator).getText();
-            } catch (StaleElementReferenceException e) {
+                WebElement elem = driver.findElement(locator);
+                if (elem.isDisplayed()) {
+                    return elem.getText();
+                }
+            } catch (Exception e) {
                 try { Thread.sleep(250); } catch (InterruptedException ignored) {}
             }
         }
-        return waitForElementVisible(locator).getText();
+        return driver.findElement(locator).getText();
     }
 
     protected boolean isElementPresent(By locator) {
         try {
             return !driver.findElements(locator).isEmpty();
-        } catch (StaleElementReferenceException ex) {
+        } catch (Exception ex) {
             return false;
         }
     }
