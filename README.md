@@ -3,8 +3,8 @@
 A Spring Boot Modular Monolith Application for clinic appointment bookings, built for the Software Testing and Validation Final Project.
 
 ## Group Members (Addis Ababa University)
-- **Ayansa Adugna** - ATE/6100/14
 - **Biruk Tesfa** - ATE/5576/14
+- **Ayansa Adugna** - ATE/6100/14
 - **Fuad Temam** - ATE/4704/14
 - **Ebisa Daba** - ATE/6263/14
 
