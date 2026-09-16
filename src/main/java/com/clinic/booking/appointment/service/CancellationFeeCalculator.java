@@ -18,7 +18,7 @@ public class CancellationFeeCalculator {
             throw new IllegalArgumentException("Notice period hours cannot be negative: " + hoursUntilAppointment);
         }
         if (hoursUntilAppointment >= 48) {
-            return 0.0;
+            return 10.0; // INTENTIONAL BUG FOR REGRESSION DEMO
         } else if (hoursUntilAppointment >= 24) {
             return 50.0;
         } else {
